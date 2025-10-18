@@ -41,14 +41,14 @@ public class Injector {
                     try {
                         return Path.of(url.toURI());
                     } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Cannot convert URL to URI: " + url, e);
                     }
                 })
                 .flatMap(path -> {
                     try {
                         return Files.walk(path);
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Collecting list of packages failed", e);
                     }
                 })
                 .filter(Files::isDirectory)
@@ -56,7 +56,6 @@ public class Injector {
                 .map(Path::toString)
                 .map(path -> path.substring(path.indexOf(parentPath.split("/")[0])))
                 .map(path -> path.replaceAll("[\\\\/]", "."))
-                .peek(System.out::println)
                 .collect(Collectors.toSet());
     }
 
@@ -86,7 +85,7 @@ public class Injector {
                     field.setAccessible(true);
                     field.set(o, instance);
                 } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("Cannot access to field: " + field.getName(), e);
                 }
             }
         }
@@ -94,7 +93,6 @@ public class Injector {
     }
 
     private static Class<?> findImplementation(Class<?> interfaceClazz) {
-        System.out.println("Finding implementation for: " + interfaceClazz);
         if (interfaceClazz.isInterface()) {
             return COMPONENTS.stream()
                     .filter(c -> Arrays.asList(c.getInterfaces()).contains(interfaceClazz))
@@ -110,7 +108,7 @@ public class Injector {
                     try {
                         return url.toURI();
                     } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Cannot convert URL to URI", e);
                     }
                 })
                 .map(Path::of)
@@ -118,7 +116,7 @@ public class Injector {
                     try {
                         return Files.walk(path);
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Collecting list of classes failed", e);
                     }
                 })
                 .map(Path::toString)
