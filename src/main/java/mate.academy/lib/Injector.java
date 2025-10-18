@@ -35,14 +35,14 @@ public class Injector {
                 .resources(parentPath)
                 .map(url -> {
                     try {
-                        return url.toURI();
+                        return Path.of(url.toURI());
                     } catch (URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
                 })
-                .flatMap(uri -> {
+                .flatMap(path -> {
                     try {
-                        return Files.walk(Path.of(uri));
+                        return Files.walk(path);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -112,7 +112,13 @@ public class Injector {
                     }
                 })
                 .map(Path::toString)
-                .map(path -> path.substring(0, path.lastIndexOf('.')))
+                .map(path -> {
+                    int lastDot = path.lastIndexOf('.');
+                    if (lastDot > 0) {
+                        return path.substring(0, lastDot);
+                    }
+                    return path;
+                })
                 .map(path -> path.replaceAll("[\\\\/]", "."))
                 .map(classpath -> classpath.substring(classpath.lastIndexOf("mate")))
                 .map(classpath -> {
