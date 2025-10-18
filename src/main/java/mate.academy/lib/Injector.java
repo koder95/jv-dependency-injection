@@ -6,9 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import mate.academy.Main;
 
@@ -21,6 +19,8 @@ public class Injector {
     private static final Set<Class<?>> COMPONENTS = CLASS_SET.stream()
             .filter(c -> c.isAnnotationPresent(Component.class))
             .collect(Collectors.toSet());
+
+    private final Map<Class<?>, Class<?>> implementations = new HashMap<>();
 
     private Injector() {
     }
@@ -60,7 +60,13 @@ public class Injector {
         if (!CLASS_SET.contains(interfaceClazz)) {
             throw new UnsupportedOperationException();
         }
-        Class<?> implementation = findImplementation(interfaceClazz);
+        Class<?> implementation;
+        if (!implementations.containsKey(interfaceClazz)) {
+            implementation = findImplementation(interfaceClazz);
+            implementations.put(interfaceClazz, implementation);
+        } else {
+            implementation = implementations.get(interfaceClazz);
+        }
         Field[] fields = implementation.getDeclaredFields();
         Object o;
         try {
