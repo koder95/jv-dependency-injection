@@ -76,7 +76,7 @@ public class Injector {
             o = implementation.getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException
                  | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Cannot create an object", e);
         }
         for (Field field : fields) {
             if (field.isAnnotationPresent(Inject.class)) {
